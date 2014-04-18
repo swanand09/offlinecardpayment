@@ -173,11 +173,16 @@ class Offlinecardpayment extends PaymentModule
                     'cvc' => "123",
                     'expiration' => "201512",
                     "cardholder" => "qq qq",
-                    "language" => "ru"
+                    "language" => "en"
                 );
                 $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
                 
+                $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
+                $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId));
+               //$orderStatus       = $pay->OrderStatusRequest(array("orderId" => $sbmOrderId));
                 p($response_pay);
+                p($status);//p($orderStatus);
+               // echo "done payment";
 	}
 	
     /*
