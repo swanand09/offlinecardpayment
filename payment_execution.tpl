@@ -8,7 +8,7 @@
 <h3>{l s='Payment Card Details' mod='offlinecardpayment'}</h3>
 
 <form action="{$this_path_ssl}validation.php" method="post">
-<input type="hidden" name="orderId" value="{$orderId}" />
+<input type="hidden" name="sbmOrderId" value="{$sbmOrderId}" />
 	<table border="0">
 
 		<tr>
@@ -30,6 +30,15 @@
 			</td>
 			<td>
 				<input type="text" name="cardNumber" id="cardNumber" value="{$cardNumber}" />
+                               
+			</td>
+		</tr>
+                <tr>
+			<td>
+				{l s='cvc:' mod='offlinecardpayment'}
+			</td>
+			<td>
+				 <input type="text" name="cvc" id="cvc" value="{$cvc}" />
 			</td>
 		</tr>
 		<tr>

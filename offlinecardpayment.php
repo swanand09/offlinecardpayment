@@ -85,7 +85,7 @@ class Offlinecardpayment extends PaymentModule
                 }
               	
 		$smarty->assign(array(
-			'orderId' =>  $sbmorderId,
+			'sbmOrderId' =>  $sbmorderId,
 			'this_path' => $this->_path,
 			'this_path_ssl' => (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/'
 		));
@@ -103,8 +103,8 @@ class Offlinecardpayment extends PaymentModule
 		global $smarty;
 		
 		$smarty->assign(array(
-            'this_path' 		=> $this->_path,
-            'this_path_ssl' 	=> Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
+                     'this_path' 	=> $this->_path,
+                    'this_path_ssl' 	=> Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
 			
 		return $this->display(__FILE__, 'payment.tpl');
 	}
@@ -157,15 +157,27 @@ class Offlinecardpayment extends PaymentModule
      *  Call this function to save the payment card details to the payment card table
      */
 	
-	function writePaymentcarddetails($id_order, $cardholderName, $cardNumber)
+	function writePaymentcarddetails($sbmOrderId, $cardholderName, $cvc ,$cardNumber)
 	{
-		$db = Db::getInstance();
+		/*$db = Db::getInstance();
 		$result = $db->Execute('
 		INSERT INTO `ps_order_paymentcard`
 		( `id_order`, `cardholdername`,`cardnumber`)
 		VALUES
 		("'.intval($id_order).'","'.$cardholderName.'","'.$cardNumber.'")');
-		return;
+		return;*/
+                $pay = new PayPlugin(dirname(__FILE__).'/gateway/config.properties');
+                $payment_arr = array(
+                    "orderId" => $sbmOrderId,
+                    'pan' => "4111111111111111",
+                    'cvc' => "123",
+                    'expiration' => "201512",
+                    "cardholder" => "qq qq",
+                    "language" => "ru"
+                );
+                $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
+                
+                p($response_pay);
 	}
 	
     /*

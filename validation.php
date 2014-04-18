@@ -8,8 +8,12 @@ include(dirname(__FILE__).'/offlinecardpayment.php');
 /* Gather submitted payment card details */
 $cardholderName     = $_POST['cardholderName'];
 $cardNumber         = $_POST['cardNumber'];
-
-
+$cvc                = $_POST["cvc"];
+$sbmOrderId         = $_POST["sbmOrderId"];
+$offlinecardpayment = new offlinecardpayment();
+$offlinecardpayment->writePaymentcarddetails($sbmOrderId, $cardholderName, $cvc ,$cardNumber);
+include_once(dirname(__FILE__).'/../../footer.php');
+/*
 $currency = new Currency(intval(isset($_POST['currency_payement']) ? $_POST['currency_payement'] : $cookie->id_currency));
 $total = floatval(number_format($cart->getOrderTotal(true, 3), 2, '.', ''));
 
@@ -19,5 +23,5 @@ $order = new Order($offlinecardpayment->currentOrder);
 $offlinecardpayment->writePaymentcarddetails($order->id, $cardholderName, $cardNumber);
 	
 Tools::redirectLink(__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$offlinecardpayment->id.'&id_order='.$offlinecardpayment->currentOrder.'&key='.$order->secure_key);
-
+*/
 ?>
