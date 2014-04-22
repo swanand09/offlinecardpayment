@@ -77,7 +77,7 @@ class Offlinecardpayment extends PaymentModule
                         "returnUrl" => $context->smarty->tpl_vars['base_dir']->value."modules/offlinecardpayment/payment.php"
                     ));
                     $sbmorderId = $response_reg["orderId"];
-                    $result2 = $db->Execute('
+                    $db->Execute('
                             INSERT INTO `'._DB_PREFIX_.'sbm_cartorder`
                             ( `id_cart`, `id_sbmorder`)
                             VALUES
@@ -118,10 +118,10 @@ class Offlinecardpayment extends PaymentModule
 			
 			$smarty->assign(array(
 			    'cardHoldername'  	        => $paymentCarddetails['cardholdername'],
-				'cardNumber' 		        => $paymentCarddetails['cardnumber'],
-				'id_order'					=> $id_order,
-				'this_page'					=> $_SERVER['REQUEST_URI'],
-				'this_path' 				=> $this->_path,
+				'cardNumber' 		=> $paymentCarddetails['cardnumber'],
+				'id_order'		=> $id_order,
+				'this_page'		=> $_SERVER['REQUEST_URI'],
+				'this_path' 		=> $this->_path,
             	'this_path_ssl' 			=> Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
 			return $this->display(__FILE__, 'invoice_block.tpl');
 
@@ -141,12 +141,15 @@ class Offlinecardpayment extends PaymentModule
 		     */
 		    		    
                     $db = Db::getInstance(); 
-            		$query = " CREATE TABLE `"._DB_PREFIX_."sbm_cartorder` (
+            		$query = "    CREATE TABLE `"._DB_PREFIX_."sbm_cartorder` (
                                         `id_sbmcartorder` int(11) NOT NULL AUTO_INCREMENT,
                                         `id_cart` int(11) NOT NULL,
                                         `id_sbmorder` varchar(255) DEFAULT NULL,
+                                        `sbm_orderstatus` tinyint(1) DEFAULT NULL,
+                                        `sbm_approvalcode` int(11) DEFAULT NULL,
+                                        `sbm_referenceNum` bigint(15) DEFAULT NULL,
                                         PRIMARY KEY (`id_sbmcartorder`)
-                                      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+                                      ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
                                     ";
 	 		        $db->Execute($query);
 		
@@ -159,19 +162,13 @@ class Offlinecardpayment extends PaymentModule
 	
 	function writePaymentcarddetails($sbmOrderId, $cardholderName, $cvc ,$cardNumber)
 	{
-		/*$db = Db::getInstance();
-		$result = $db->Execute('
-		INSERT INTO `ps_order_paymentcard`
-		( `id_order`, `cardholdername`,`cardnumber`)
-		VALUES
-		("'.intval($id_order).'","'.$cardholderName.'","'.$cardNumber.'")');
-		return;*/
+		global $smarty;
                 $pay = new PayPlugin(dirname(__FILE__).'/gateway/config.properties');
                 $payment_arr = array(
                     "orderId" => $sbmOrderId,
-                    'pan' => "4111111111111111",
-                    'cvc' => "123",
-                    'expiration' => "201512",
+                    'pan' => "5471241000047208",
+                    'cvc' => "670",
+                    'expiration' => "201812",
                     "cardholder" => "qq qq",
                     "language" => "en"
                 );
@@ -180,9 +177,43 @@ class Offlinecardpayment extends PaymentModule
                 $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
                 $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId));
                //$orderStatus       = $pay->OrderStatusRequest(array("orderId" => $sbmOrderId));
-                p($response_pay);
-                p($status);//p($orderStatus);
-               // echo "done payment";
+                $parseDat = array();
+                $parseDat = parse_url($response_pay["redirect"]);
+                parse_str($parseDat["query"]);
+                
+                $db = Db::getInstance(); 
+                $db->Execute('UPDATE `'._DB_PREFIX_.'sbm_cartorder` SET sbm_orderstatus = '.$OrderStatus.', sbm_approvalcode='.$approvalCode.', sbm_referenceNum='.$referenceNumber.' WHERE id_sbmorder="'.$sbmOrderId.'"');
+               switch($OrderStatus){
+                   case 0:
+                       $message = "Order is registered, but not paid";
+                   break;
+                   case 1:
+                       $message = "Order amount is pre-authorized";
+                   break;
+                   case 2:
+                       $message = "Order amount is authorized";
+                   break;
+                   case 3:
+                       $message = "Authorization cancelled";
+                   break;
+                   case 4:
+                       $message = "Transaction operation was refunded";
+                   break;
+                   case 5:
+                       $message = "Authorization was initiated through the ACS of issuing bank";
+                   break;
+                   case 6:
+                       $message = "Authorization rejected";
+                   break;
+               }
+              
+              
+               $smarty->assign(array(
+			'msgPayStatus' =>  $message,
+			'this_path' => $this->_path,
+			'this_path_ssl' => (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/'
+		));
+	       return $this->display(__FILE__, 'invoice_block.tpl');
 	}
 	
     /*

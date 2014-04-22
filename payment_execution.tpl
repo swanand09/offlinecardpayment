@@ -5,7 +5,7 @@
 {assign var='current_step' value='payment'}
 {include file="$tpl_dir./order-steps.tpl"}
 
-<h3>{l s='Payment Card Details' mod='offlinecardpayment'}</h3>
+<h3>{l s='Détails de la carte de paiement' mod='offlinecardpayment'}</h3>
 
 <form action="{$this_path_ssl}validation.php" method="post">
 <input type="hidden" name="sbmOrderId" value="{$sbmOrderId}" />

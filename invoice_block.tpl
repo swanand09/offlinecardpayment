@@ -1,16 +1,8 @@
-<fieldset style="width: 400px;">
+{capture name=path}{l s='Shipping'}{/capture}
+{include file="$tpl_dir./breadcrumb.tpl"}
+<h2>{l s='Order summary' mod='offlinecardpayment'}</h2>
 
-	<legend>
+{assign var='current_step' value='payment'}
+{include file="$tpl_dir./order-steps.tpl"}
 
-     {l s='Payment Card Information' mod='offlinecardpayment'}
-
-	</legend>
-
-	<div id="info" border: solid red 1px;">
-	<table>
-	<tr><td>Card Holder Name:</td> <td>{$cardHoldername}</td></tr>
-	<tr><td>Card Number:</td> <td>{$cardNumber}</td></tr>
-	</table>
-	</div>
-
-</fieldset>
+<h3>{l s='Détails de la carte de paiement' mod='offlinecardpayment'}</h3>
