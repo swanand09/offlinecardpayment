@@ -162,8 +162,7 @@ class Offlinecardpayment extends PaymentModule
 	
 	function writePaymentcarddetails($sbmOrderId, $cardholderName, $cvc ,$cardNumber)
 	{
-		global $smarty;
-                $pay = new PayPlugin(dirname(__FILE__).'/gateway/config.properties');
+		$pay = new PayPlugin(dirname(__FILE__).'/gateway/config.properties');
                 $payment_arr = array(
                     "orderId" => $sbmOrderId,
                     'pan' => "5471241000047208",
@@ -206,14 +205,8 @@ class Offlinecardpayment extends PaymentModule
                        $message = "Authorization rejected";
                    break;
                }
-              
-              
-               $smarty->assign(array(
-			'msgPayStatus' =>  $message,
-			'this_path' => $this->_path,
-			'this_path_ssl' => (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/'
-		));
-	       return $this->display(__FILE__, 'invoice_block.tpl');
+               
+	       return $this->display(__FILE__, 'validation.tpl');
 	}
 	
     /*
