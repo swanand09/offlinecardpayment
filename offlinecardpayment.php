@@ -5,13 +5,12 @@ class Offlinecardpayment extends PaymentModule
 	
 	private $_html = '';
 	private $_postErrors = array();
-	
+	private $transactionId = '';
 	function __construct()
 	{
 		$this->name = 'offlinecardpayment';
 		$this->tab = 'payments_gateways';
-		$this->version = 1;
-
+		$this->version = 1;              
 		parent::__construct(); // The parent construct is required for translations
 
 		$this->page = basename(__FILE__, '.php');
@@ -122,7 +121,7 @@ class Offlinecardpayment extends PaymentModule
 				'id_order'		=> $id_order,
 				'this_page'		=> $_SERVER['REQUEST_URI'],
 				'this_path' 		=> $this->_path,
-            	'this_path_ssl' 			=> Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
+                                'this_path_ssl' 	=> Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
 			return $this->display(__FILE__, 'invoice_block.tpl');
 
 	}
@@ -141,15 +140,16 @@ class Offlinecardpayment extends PaymentModule
 		     */
 		    		    
                     $db = Db::getInstance(); 
-            		$query = "    CREATE TABLE `"._DB_PREFIX_."sbm_cartorder` (
-                                        `id_sbmcartorder` int(11) NOT NULL AUTO_INCREMENT,
-                                        `id_cart` int(11) NOT NULL,
-                                        `id_sbmorder` varchar(255) DEFAULT NULL,
-                                        `sbm_orderstatus` tinyint(1) DEFAULT NULL,
-                                        `sbm_approvalcode` int(11) DEFAULT NULL,
-                                        `sbm_referenceNum` bigint(15) DEFAULT NULL,
-                                        PRIMARY KEY (`id_sbmcartorder`)
-                                      ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+            		$query = " CREATE TABLE `"._DB_PREFIX_."sbm_cartorder` (
+                                      `id_sbmcartorder` int(11) NOT NULL AUTO_INCREMENT,
+                                      `id_cart` int(11) NOT NULL,
+                                      `id_sbmorder` varchar(255) DEFAULT NULL,
+                                      `sbm_orderstatus` tinyint(1) DEFAULT NULL,
+                                      `sbm_approvalcode` int(11) DEFAULT NULL,
+                                      `sbm_referenceNum` bigint(15) DEFAULT NULL,
+                                      `sbm_orderNum` int(11) DEFAULT NULL,
+                                      PRIMARY KEY (`id_sbmcartorder`)
+                                    ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
                                     ";
 	 		        $db->Execute($query);
 		
@@ -160,29 +160,32 @@ class Offlinecardpayment extends PaymentModule
      *  Call this function to save the payment card details to the payment card table
      */
 	
-	function writePaymentcarddetails($sbmOrderId, $cardholderName, $cvc ,$cardNumber)
+	function writePaymentcarddetails($sbmOrderId, $cardholderName, $cvc ,$cardNumber,$cardExpiration)
 	{
 		$pay = new PayPlugin(dirname(__FILE__).'/gateway/config.properties');
                 $payment_arr = array(
                     "orderId" => $sbmOrderId,
-                    'pan' => "5471241000047208",
-                    'cvc' => "670",
-                    'expiration' => "201812",
-                    "cardholder" => "qq qq",
+                    'pan' => $cardNumber,
+                    'cvc' => $cvc,
+                    'expiration' => $cardExpiration,
+                    "cardholder" => $cardholderName,
                     "language" => "en"
                 );
+                               
                 $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
-                
-                $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
-                $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId));
+                //$status       = $pay->StatusRequest(array("orderId" => $sbmOrderId));               
                //$orderStatus       = $pay->OrderStatusRequest(array("orderId" => $sbmOrderId));
                 $parseDat = array();
                 $parseDat = parse_url($response_pay["redirect"]);
+               
                 parse_str($parseDat["query"]);
                 
                 $db = Db::getInstance(); 
-                $db->Execute('UPDATE `'._DB_PREFIX_.'sbm_cartorder` SET sbm_orderstatus = '.$OrderStatus.', sbm_approvalcode='.$approvalCode.', sbm_referenceNum='.$referenceNumber.' WHERE id_sbmorder="'.$sbmOrderId.'"');
-               switch($OrderStatus){
+                $db->Execute('UPDATE `'._DB_PREFIX_.'sbm_cartorder` SET sbm_orderstatus = '.$OrderStatus.', sbm_approvalcode='.$approvalCode.', sbm_referenceNum='.$referenceNumber.', sbm_orderNum ='.$OrderNumber.' WHERE id_sbmorder="'.$sbmOrderId.'"');
+                
+                $this->transactionId = $OrderNumber;
+                
+                switch($OrderStatus){
                    case 0:
                        $message = "Order is registered, but not paid";
                    break;
@@ -206,9 +209,31 @@ class Offlinecardpayment extends PaymentModule
                    break;
                }
                
-	       return $this->display(__FILE__, 'validation.tpl');
+	       return;// $this->display(__FILE__, 'validation.tpl');
 	}
 	
+        
+        public function hookPaymentReturn($params)
+	{
+		if (!$this->active)
+			return;
+               
+		$psOrderStatus = $params['objOrder']->getCurrentState();
+		
+                if ($psOrderStatus == Configuration::get('PS_OS_PREPARATION'))
+		{
+			$this->smarty->assign(array(
+				'total_to_pay' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),				
+				'status' => 'ok',
+				'id_order' => $params['objOrder']->id
+			));
+			if (isset($params['objOrder']->reference) && !empty($params['objOrder']->reference))
+				$this->smarty->assign('reference', $params['objOrder']->reference);
+		}
+		else
+			$this->smarty->assign('status', 'failed');
+		return $this->display(__FILE__, 'payment_return.tpl');
+	}
     /*
      *  Call this function to read the payment card details from the payment card table
      */

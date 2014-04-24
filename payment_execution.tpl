@@ -12,18 +12,24 @@
 	<table border="0">
 
 		<tr>
-
-			<td>
-
-				{l s='Name on Card:' mod='offlinecardpayment'}
-			</td>
-			<td>
-				<input type="text" name="cardholderName" id="cardholderName" value="{$cardholderName}"/>
-
-			</td>
-
+                    <td>
+                        {l s='Name on Card:' mod='offlinecardpayment'}
+                    </td>
+                    <td>
+                        <input type="text" name="cardholderName" id="cardholderName" value="{$cardholderName}"/>
+                    </td>
 		</tr>
-
+                <tr>
+			<td>
+				{l s='Type de carte:' mod='offlinecardpayment'}
+			</td>
+			<td>
+                            <select name="cardBrand">
+                                <option value="MasterCard">MasterCard</option>
+                                <option value="VISA">VISA</option>
+                            </select>
+			</td>
+		</tr>    
 		<tr>
 			<td>
 				{l s='Credit Card Number:' mod='offlinecardpayment'}
