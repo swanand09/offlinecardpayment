@@ -5,7 +5,9 @@ class Offlinecardpayment extends PaymentModule
 	
 	private $_html = '';
 	private $_postErrors = array();
-	private $transactionId = '';
+	public $transactionId = '';
+        public $sbmOrderMsgSta = '';
+        public $sbmOrderStatus = '';
 	function __construct()
 	{
 		$this->name = 'offlinecardpayment';
@@ -38,7 +40,7 @@ class Offlinecardpayment extends PaymentModule
 
 	public function uninstall()
 	{
-		if (!parent::uninstall())
+		if (!parent::uninstall()OR !$this->deletePaymentcardtbl())
 			return false;
 		return true;
 	}
@@ -156,6 +158,24 @@ class Offlinecardpayment extends PaymentModule
 			return true;
 	}
 		
+        
+        function deletePaymentcardtbl()
+	{
+			/**Function called by install - 
+			 * creates the "order_paymentcard" table required for storing payment card details
+		     * Column Descriptions: id_payment the primary key. 
+		     * id order: Stores the order number associated with this payment card
+		     * cardholder_name: Stores the card holder name
+		     * cardnumber: Stores the card number
+		     * expiry date: Stores date the card expires
+		     */
+		    		    
+                    $db = Db::getInstance(); 
+            		$query = "DROP TABLE `"._DB_PREFIX_."sbm_cartorder`;";
+	 		        $db->Execute($query);
+		
+			return true;
+	}
 	/*
      *  Call this function to save the payment card details to the payment card table
      */
@@ -173,18 +193,23 @@ class Offlinecardpayment extends PaymentModule
                 );
                                
                 $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
-                //$status       = $pay->StatusRequest(array("orderId" => $sbmOrderId));               
-               //$orderStatus       = $pay->OrderStatusRequest(array("orderId" => $sbmOrderId));
-                $parseDat = array();
-                $parseDat = parse_url($response_pay["redirect"]);
-               
-                parse_str($parseDat["query"]);
                 
+                if(isset($response_pay["error"])){
+                    $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId)); 
+                    $OrderStatus        = $status["OrderStatus"];  
+                    $OrderNumber        = $status["OrderNumber"];  
+                    $approvalCode       = $status["approvalCode"];
+                    $referenceNumber    = $status["referenceNumber"]; 
+                }else{
+                    $parseDat = array();
+                    $parseDat = parse_url($response_pay["redirect"]);
+                    parse_str($parseDat["query"]);
+                }  
                 $db = Db::getInstance(); 
                 $db->Execute('UPDATE `'._DB_PREFIX_.'sbm_cartorder` SET sbm_orderstatus = '.$OrderStatus.', sbm_approvalcode='.$approvalCode.', sbm_referenceNum='.$referenceNumber.', sbm_orderNum ='.$OrderNumber.' WHERE id_sbmorder="'.$sbmOrderId.'"');
                 
-                $this->transactionId = $OrderNumber;
-                
+                $this->transactionId = $referenceNumber;
+                $this->sbmOrderStatus = $OrderStatus;
                 switch($OrderStatus){
                    case 0:
                        $message = "Order is registered, but not paid";
@@ -208,7 +233,7 @@ class Offlinecardpayment extends PaymentModule
                        $message = "Authorization rejected";
                    break;
                }
-               
+                  $this->sbmOrderMsgSta = $message;
 	       return;// $this->display(__FILE__, 'validation.tpl');
 	}
 	
@@ -220,7 +245,7 @@ class Offlinecardpayment extends PaymentModule
                
 		$psOrderStatus = $params['objOrder']->getCurrentState();
 		
-                if ($psOrderStatus == Configuration::get('PS_OS_PREPARATION'))
+                if ($psOrderStatus == Configuration::get('PS_OS_PREPARATION')||$psOrderStatus == Configuration::get('PS_OS_PAYMENT'))
 		{
 			$this->smarty->assign(array(
 				'total_to_pay' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),				

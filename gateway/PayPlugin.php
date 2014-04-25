@@ -16,7 +16,7 @@ class PayPlugin
 	public function __construct($config_file = 'config.properties')
 	{
 		
-		$this->config = $this->parse($config_file) + $this->parse(dirname(__FILE__).'/gateway/additional.ini');
+		$this->config = $this->parse($config_file) + $this->parse(dirname(__FILE__).'/additional.ini');
 		
 		// Code block below is aimed to support configuration file
 		// *******************************************************

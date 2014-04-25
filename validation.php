@@ -14,7 +14,9 @@ $sbmOrderId         = $_POST["sbmOrderId"];
 $cardExpiration     = $_POST["expDate_Year"].$_POST["expDate_Month"];
 $offlinecardpayment = new offlinecardpayment();
 $total = $context->cart->getOrderTotal(true, Cart::BOTH);
+
 $offlinecardpayment->writePaymentcarddetails($sbmOrderId, $cardholderName, $cvc ,$cardNumber,$cardExpiration);
+
 $transactionArr =  array(
                           "transaction_id"  =>$offlinecardpayment->transactionId,
                           "card_number"     =>$cardNumber,
@@ -22,8 +24,26 @@ $transactionArr =  array(
                           "card_expiration" =>$cardExpiration,
                           "card_holder"     =>$cardholderName
                          );
-d($transactionArr);
-$offlinecardpayment->validateOrder($cart->id,  _PS_OS_PREPARATION_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
+switch($offlinecardpayment->sbmOrderStatus){
+    case 0:
+        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_PREPARATION_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
+    break;
+    case 1:
+        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_PREPARATION_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
+    break;
+    case 2:
+        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_PAYMENT_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
+    break;
+    case 3:
+        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_CANCELED_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
+    break;
+    case 4:
+        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_REFUND_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
+    break;
+    case 6:
+        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_ERROR_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
+    break;
+}
 
 $order = new Order($offlinecardpayment->currentOrder);
 
