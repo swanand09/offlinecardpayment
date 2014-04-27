@@ -16,7 +16,9 @@ $offlinecardpayment = new offlinecardpayment();
 $total = $context->cart->getOrderTotal(true, Cart::BOTH);
 
 $offlinecardpayment->writePaymentcarddetails($sbmOrderId, $cardholderName, $cvc ,$cardNumber,$cardExpiration);
-
+if(empty($offlinecardpayment->transactionId)){
+   die($offlinecardpayment->l($offlinecardpayment->sbmOrderMsgSta, 'validation'));    
+}
 $transactionArr =  array(
                           "transaction_id"  =>$offlinecardpayment->transactionId,
                           "card_number"     =>$cardNumber,

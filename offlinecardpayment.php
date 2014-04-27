@@ -73,7 +73,7 @@ class Offlinecardpayment extends PaymentModule
                     //if no insert cart id into table and fetch SBM orderNo                   
                     try{
                      $response_reg = $pay->registerRequest( array(
-                         "orderNumber" => $ordernumber,
+                         "orderNumber" => $ordernumber+10000000,
                          "amount" => $context->cart->getOrderTotal(true, Cart::BOTH),
                          "currency" => $context->currency->iso_code_num,
                          "returnUrl" => $context->smarty->tpl_vars['base_dir']->value."modules/offlinecardpayment/payment.php"
@@ -218,7 +218,9 @@ class Offlinecardpayment extends PaymentModule
                         parse_str($parseDat["query"]);
                     }  
                 }catch(Exception $e){
-                     d($e->getMessage());                    
+                     $this->sbmOrderMsgSta = $e->getMessage();
+                    
+                    return;                    
                 }   
                 $db = Db::getInstance(); 
                 $db->Execute('UPDATE `'._DB_PREFIX_.'sbm_cartorder` SET sbm_orderstatus = '.$OrderStatus.', sbm_approvalcode='.$approvalCode.', sbm_referenceNum='.$referenceNumber.', sbm_orderNum ='.$OrderNumber.' WHERE id_sbmorder="'.$sbmOrderId.'"');
