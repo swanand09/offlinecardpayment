@@ -44,7 +44,7 @@
 /**
  * Base class for exceptions in PEAR
  */
-require_once 'PEAR/Exception.php';
+require_once dirname(__FILE__).'/../../PEAR/Exception.php';
 
 /**
  * Base exception class for HTTP_Request2 package

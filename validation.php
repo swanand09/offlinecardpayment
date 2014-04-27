@@ -26,7 +26,7 @@ $transactionArr =  array(
                          );
 switch($offlinecardpayment->sbmOrderStatus){
     case 0:
-        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_PREPARATION_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
+        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_ERROR_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
     break;
     case 1:
         $offlinecardpayment->validateOrder($cart->id,  _PS_OS_PREPARATION_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);

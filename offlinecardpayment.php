@@ -71,19 +71,29 @@ class Offlinecardpayment extends PaymentModule
                     $sbmorderId = $result1[0]["id_sbmorder"];
                 }else{
                     //if no insert cart id into table and fetch SBM orderNo                   
-                    $response_reg = $pay->registerRequest( array(
-                        "orderNumber" => $ordernumber,
-                        "amount" => $context->cart->getOrderTotal(true, Cart::BOTH),
-                        "currency" => $context->currency->iso_code_num,
-                        "returnUrl" => $context->smarty->tpl_vars['base_dir']->value."modules/offlinecardpayment/payment.php"
-                    ));
-                    $sbmorderId = $response_reg["orderId"];
+                    try{
+                     $response_reg = $pay->registerRequest( array(
+                         "orderNumber" => $ordernumber,
+                         "amount" => $context->cart->getOrderTotal(true, Cart::BOTH),
+                         "currency" => $context->currency->iso_code_num,
+                         "returnUrl" => $context->smarty->tpl_vars['base_dir']->value."modules/offlinecardpayment/payment.php"
+                     ));
+                     if(isset($response_reg["error"]))
+                     {
+                         throw new Exception("Error connecting to SBM gateway<br>".$response_reg["error"]);
+                     }
+                     $sbmorderId = $response_reg["orderId"];
+                     
+                   }catch(Exception $e){
+                       p($response_reg);
+                       d($e->getMessage());
+                   }
                     $db->Execute('
                             INSERT INTO `'._DB_PREFIX_.'sbm_cartorder`
                             ( `id_cart`, `id_sbmorder`)
                             VALUES
                             ('.$ordernumber.',"'.$sbmorderId.'")');
-                }
+                    }
               	
 		$smarty->assign(array(
 			'sbmOrderId' =>  $sbmorderId,
@@ -191,20 +201,25 @@ class Offlinecardpayment extends PaymentModule
                     "cardholder" => $cardholderName,
                     "language" => "en"
                 );
-                               
-                $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
-                
-                if(isset($response_pay["error"])){
-                    $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId)); 
-                    $OrderStatus        = $status["OrderStatus"];  
-                    $OrderNumber        = $status["OrderNumber"];  
-                    $approvalCode       = $status["approvalCode"];
-                    $referenceNumber    = $status["referenceNumber"]; 
-                }else{
-                    $parseDat = array();
-                    $parseDat = parse_url($response_pay["redirect"]);
-                    parse_str($parseDat["query"]);
-                }  
+                try{               
+                    $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
+
+                    if(isset($response_pay["error"])){
+                        throw new Exception("Error connecting to SBM gateway ".$response_pay["error"]);
+                        $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId)); 
+                        $OrderStatus        = $status["OrderStatus"];  
+                        $OrderNumber        = $status["OrderNumber"];  
+                        $approvalCode       = $status["approvalCode"];
+                        $referenceNumber    = $status["referenceNumber"]; 
+                        
+                    }else{
+                        $parseDat = array();
+                        $parseDat = parse_url($response_pay["redirect"]);
+                        parse_str($parseDat["query"]);
+                    }  
+                }catch(Exception $e){
+                     d($e->getMessage());                    
+                }   
                 $db = Db::getInstance(); 
                 $db->Execute('UPDATE `'._DB_PREFIX_.'sbm_cartorder` SET sbm_orderstatus = '.$OrderStatus.', sbm_approvalcode='.$approvalCode.', sbm_referenceNum='.$referenceNumber.', sbm_orderNum ='.$OrderNumber.' WHERE id_sbmorder="'.$sbmOrderId.'"');
                 

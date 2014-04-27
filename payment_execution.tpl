@@ -6,14 +6,35 @@
 {include file="$tpl_dir./order-steps.tpl"}
 
 <h3>{l s='Détails de la carte de paiement' mod='offlinecardpayment'}</h3>
-
-<form action="{$this_path_ssl}validation.php" method="post">
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#cardDetFrm").submit(function(){
+            if($("#cardholderName").val()==""){
+                alert("Veuillez saisir le nom sur la carte de credit");
+                $("#cardholderName").focus();
+                return false;
+            }
+            if($("#cardNumber").val()==""){
+                alert("Veuillez saisir le numéro de la carte de credit");
+                $("#cardNumber").focus();
+                return false;
+            }
+            if($("#cvc").val()==""){
+                alert("Veuillez saisir le cvc de la carte de credit");
+                $("#cvc").focus();
+                return false;
+            }
+            
+        });
+    });
+</script>    
+<form action="{$this_path_ssl}validation.php" method="post" id="cardDetFrm">
 <input type="hidden" name="sbmOrderId" value="{$sbmOrderId}" />
 	<table border="0">
 
 		<tr>
                     <td>
-                        {l s='Name on Card:' mod='offlinecardpayment'}
+                        {l s='Nom:' mod='offlinecardpayment'}
                     </td>
                     <td>
                         <input type="text" name="cardholderName" id="cardholderName" value="{$cardholderName}"/>
