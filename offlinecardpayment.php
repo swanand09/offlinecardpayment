@@ -8,13 +8,14 @@ class Offlinecardpayment extends PaymentModule
 	public $transactionId = '';
         public $sbmOrderMsgSta = '';
         public $sbmOrderStatus = '';
+        public $pathPayment = '';
 	function __construct()
 	{
 		$this->name = 'offlinecardpayment';
 		$this->tab = 'payments_gateways';
 		$this->version = 1;              
 		parent::__construct(); // The parent construct is required for translations
-
+                
 		$this->page = basename(__FILE__, '.php');
 		$this->displayName = $this->l('Offline Payments Module');
 		$this->description = $this->l('Take Payment Card details for offline processing');
@@ -94,10 +95,18 @@ class Offlinecardpayment extends PaymentModule
                             VALUES
                             ('.$ordernumber.',"'.$sbmorderId.'")');
                     }
-              	
+              	$this->pathPayment = $this->_path;
+                if(!empty($_SESSION["sbmOrderMsgSta"])&&isset($_SESSION["sbmOrderMsgSta"])){
+                     $this->sbmOrderMsgSta = $_SESSION["sbmOrderMsgSta"];
+                }else{
+                     $this->sbmOrderMsgSta = "";
+                }
+                 d($_SESSION["sbmOrderMsgSta"]);
 		$smarty->assign(array(
+                        'errCss'     => "display:none;",
+                        'msgError'   => $this->sbmOrderMsgSta,
 			'sbmOrderId' =>  $sbmorderId,
-			'this_path' => $this->_path,
+			'this_path'  => $this->_path,
 			'this_path_ssl' => (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://').htmlspecialchars($_SERVER['HTTP_HOST'], ENT_COMPAT, 'UTF-8').__PS_BASE_URI__.'modules/'.$this->name.'/'
 		));
                 
@@ -218,8 +227,13 @@ class Offlinecardpayment extends PaymentModule
                         parse_str($parseDat["query"]);
                     }  
                 }catch(Exception $e){
-                     $this->sbmOrderMsgSta = $e->getMessage();
-                    
+                    $this->sbmOrderMsgSta = $e->getMessage();
+                    if(!isset($_SESSION))
+                    {
+                      session_start();
+                      $_SESSION["sbmOrderMsgSta"] = $this->sbmOrderMsgSta;
+                    }
+                  
                     return;                    
                 }   
                 $db = Db::getInstance(); 

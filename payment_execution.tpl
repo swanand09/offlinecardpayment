@@ -25,6 +25,8 @@
                 $("#cvc").focus();
                 return false;
             }
+            return true;
+            /*
             $.post(
                  "{$this_path_ssl}validation.php",
                   { 
@@ -42,13 +44,14 @@
                       $(".error" ).css('display','block').html(data);
                       
                 });
-            return false;
+            return false;*/
         });
     });
 </script>   
-<div class="error">
+<div class="error" style="{$errCss}">
+    {l s='$msgError' mod='offlinecardpayment'}
 </div>
-<form action="#" method="post" id="cardDetFrm">
+<form action="{$this_path_ssl}validation.php" method="post" id="cardDetFrm">
  <fieldset class="account_creation">   
      <h3>{l s='Détails de la carte de paiement' mod='offlinecardpayment'}</h3>
 <input type="hidden" name="sbmOrderId" value="{$sbmOrderId}" />
