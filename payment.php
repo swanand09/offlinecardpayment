@@ -8,6 +8,7 @@ if (!$cookie->isLogged())
     Tools::redirect('authentication.php?back=order.php');
 	
 $offlinecardpayment = new offlinecardpayment();
+
 echo $offlinecardpayment->execPayment($context);
 
 include_once(dirname(__FILE__).'/../../footer.php');

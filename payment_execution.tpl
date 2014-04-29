@@ -8,7 +8,7 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        $(".error" ).css('display','none');
+      //$(".error" ).css('display','none');
         $("#cardDetFrm").submit(function(){
             if($("#cardholderName").val()==""){
                 alert("Veuillez saisir le nom sur la carte de credit");
@@ -25,8 +25,8 @@
                 $("#cvc").focus();
                 return false;
             }
-            return true;
-            /*
+            
+ 
             $.post(
                  "{$this_path_ssl}validation.php",
                   { 
@@ -35,26 +35,28 @@
                         cardNumber:     $("#cardNumber").val(),
                         cvc:            $("#cvc").val(),
                         sbmOrderId:     $("#sbmOrderId").val(),
-                        cardExpiration: $("#expDate_Year").val()+$("#expDate_Month").val()
+                        cardExpiration: $("select[name='expDate_Year']").val()+$("select[name='expDate_Month']").val()
                         
                     },
                  
-                function(data) {
-                       alert(data); 
-                      $(".error" ).css('display','block').html(data);
-                      
-                });
-            return false;*/
+                function(data) {   
+                   if(data.error=="none"){
+                         $(location).attr('href',data.redirectUrl);
+                   }else{
+                      $(".error" ).css('display','block').html(data.error);  
+                   }
+                },'json');
+            return false;
         });
     });
 </script>   
-<div class="error" style="{$errCss}">
-    {l s='$msgError' mod='offlinecardpayment'}
+<div class="error" style="display:{$errCss}">   
+    {$msgError}
 </div>
-<form action="{$this_path_ssl}validation.php" method="post" id="cardDetFrm">
+<form action="#" method="post" id="cardDetFrm">
  <fieldset class="account_creation">   
      <h3>{l s='Détails de la carte de paiement' mod='offlinecardpayment'}</h3>
-<input type="hidden" name="sbmOrderId" value="{$sbmOrderId}" />
+<input type="hidden" name="sbmOrderId" id="sbmOrderId" value="{$sbmOrderId}" />
 <p class="required text">
     <label style="width:20%">{l s='Nom:' mod='offlinecardpayment'} <sup>*</sup></label>
      <input type="text" name="cardholderName" id="cardholderName" value="{$cardholderName}" class="text" />    

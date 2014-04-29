@@ -8,7 +8,7 @@ class Offlinecardpayment extends PaymentModule
 	public $transactionId = '';
         public $sbmOrderMsgSta = '';
         public $sbmOrderStatus = '';
-        public $pathPayment = '';
+        
 	function __construct()
 	{
 		$this->name = 'offlinecardpayment';
@@ -74,7 +74,7 @@ class Offlinecardpayment extends PaymentModule
                     //if no insert cart id into table and fetch SBM orderNo                   
                     try{
                      $response_reg = $pay->registerRequest( array(
-                         "orderNumber" => $ordernumber+10000000,
+                         "orderNumber" => $ordernumber+mt_rand(),
                          "amount" => $context->cart->getOrderTotal(true, Cart::BOTH),
                          "currency" => $context->currency->iso_code_num,
                          "returnUrl" => $context->smarty->tpl_vars['base_dir']->value."modules/offlinecardpayment/payment.php"
@@ -86,8 +86,7 @@ class Offlinecardpayment extends PaymentModule
                      $sbmorderId = $response_reg["orderId"];
                      
                    }catch(Exception $e){
-                       p($response_reg);
-                       d($e->getMessage());
+                       $this->sbmOrderMsgSta = $e->getMessage();                      
                    }
                     $db->Execute('
                             INSERT INTO `'._DB_PREFIX_.'sbm_cartorder`
@@ -95,15 +94,9 @@ class Offlinecardpayment extends PaymentModule
                             VALUES
                             ('.$ordernumber.',"'.$sbmorderId.'")');
                     }
-              	$this->pathPayment = $this->_path;
-                if(!empty($_SESSION["sbmOrderMsgSta"])&&isset($_SESSION["sbmOrderMsgSta"])){
-                     $this->sbmOrderMsgSta = $_SESSION["sbmOrderMsgSta"];
-                }else{
-                     $this->sbmOrderMsgSta = "";
-                }
-                 d($_SESSION["sbmOrderMsgSta"]);
-		$smarty->assign(array(
-                        'errCss'     => "display:none;",
+                   $errCss = empty($this->sbmOrderMsgSta)?"none":"block";
+		$smarty->assign(array(                        
+                        'errCss'     => $errCss,
                         'msgError'   => $this->sbmOrderMsgSta,
 			'sbmOrderId' =>  $sbmorderId,
 			'this_path'  => $this->_path,
@@ -228,12 +221,6 @@ class Offlinecardpayment extends PaymentModule
                     }  
                 }catch(Exception $e){
                     $this->sbmOrderMsgSta = $e->getMessage();
-                    if(!isset($_SESSION))
-                    {
-                      session_start();
-                      $_SESSION["sbmOrderMsgSta"] = $this->sbmOrderMsgSta;
-                    }
-                  
                     return;                    
                 }   
                 $db = Db::getInstance(); 
@@ -261,6 +248,7 @@ class Offlinecardpayment extends PaymentModule
                        $message = "Authorization was initiated through the ACS of issuing bank";
                    break;
                    case 6:
+                      // $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId)); 
                        $message = "Authorization rejected";
                    break;
                }

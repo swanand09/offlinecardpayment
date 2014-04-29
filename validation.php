@@ -1,7 +1,7 @@
 <?php
 
 include(dirname(__FILE__).'/../../config/config.inc.php');
-include(dirname(__FILE__).'/../../header.php');
+require_once(dirname(__FILE__).'/../../init.php');
 include(dirname(__FILE__).'/offlinecardpayment.php');
 			
 
@@ -11,13 +11,13 @@ $cardholderName     = $_POST['cardholderName'];
 $cardNumber         = $_POST['cardNumber'];
 $cvc                = $_POST["cvc"];
 $sbmOrderId         = $_POST["sbmOrderId"];
-$cardExpiration     = $_POST["expDate_Year"].$_POST["expDate_Month"];
+$cardExpiration     = $_POST["cardExpiration"];
 $offlinecardpayment = new offlinecardpayment();
 $total = $context->cart->getOrderTotal(true, Cart::BOTH);
 
 $offlinecardpayment->writePaymentcarddetails($sbmOrderId, $cardholderName, $cvc ,$cardNumber,$cardExpiration);
-if(empty($offlinecardpayment->transactionId)){
-  header("Location:".$offlinecardpayment->pathPayment."payment.php");exit;
+if(empty($offlinecardpayment->transactionId)){    
+  echo Tools::jsonEncode(array("error"=>$offlinecardpayment->sbmOrderMsgSta)); exit;  
 }
 $transactionArr =  array(
                           "transaction_id"  =>$offlinecardpayment->transactionId,
@@ -49,7 +49,11 @@ switch($offlinecardpayment->sbmOrderStatus){
 
 $order = new Order($offlinecardpayment->currentOrder);
 
-Tools::redirectLink(__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$offlinecardpayment->id.'&id_order='.$offlinecardpayment->currentOrder.'&key='.$order->secure_key);
-//include_once(dirname(__FILE__).'/../../footer.php');
+//Tools::redirectLink(__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$offlinecardpayment->id.'&id_order='.$offlinecardpayment->currentOrder.'&key='.$order->secure_key);
+echo Tools::jsonEncode(array(
+                                "error"=> "none",
+                                "redirectUrl"=>__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$offlinecardpayment->id.'&id_order='.$offlinecardpayment->currentOrder.'&key='.$order->secure_key
+                              )
+                       );exit;
 
 ?>
