@@ -140,6 +140,14 @@ class Offlinecardpayment extends PaymentModule
 
 	}
 	
+        
+        function refundPayment($context){
+           $pay = new PayPlugin(dirname(__FILE__).'/gateway/config.properties');
+            $response_reg = $pay->refund( array(
+                         "orderNumber" => $ordernumber+mt_rand(),
+                         "amount" => $context->cart->getOrderTotal(true, Cart::BOTH)                        
+                     ));
+        }
 		
 	
 	function createPaymentcardtbl()

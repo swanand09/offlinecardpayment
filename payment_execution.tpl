@@ -5,7 +5,8 @@
 {assign var='current_step' value='payment'}
 {include file="$tpl_dir./order-steps.tpl"}
 
-
+ <script src="{$modules_dir}offlinecardpayment/assets/js/jquery.loader.js" type="text/javascript"></script>
+ <link href="{$modules_dir}offlinecardpayment/assets/css/jquery.loader.css" rel="stylesheet" />
 <script type="text/javascript">
     $(document).ready(function () {
       //$(".error" ).css('display','none');
@@ -26,7 +27,10 @@
                 return false;
             }
             
- 
+            $.loader({
+						className:"blue-with-image",
+						content:''
+					});
             $.post(
                  "{$this_path_ssl}validation.php",
                   { 
@@ -40,6 +44,7 @@
                     },
                  
                 function(data) {   
+                    $.loader('close');
                    if(data.error=="none"){
                          $(location).attr('href',data.redirectUrl);
                    }else{
