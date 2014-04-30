@@ -7,9 +7,12 @@
 }
 #jquery-loader-background{background-color: silver}
 #jquery-loader.blue-with-image{
-	border:2px #008587 solid;
+	/*border:2px #008587 solid;*/
+        
+        border:2px #F2E9E6 solid;
 	padding-top:35px;
-	background-color: white;
+	/*background-color: white;*/
+        background-color:#FAF6F4;
 	text-align: center;
 	background-image: url(images/ajax-loader.gif);
 	background-position: center center;

@@ -123,30 +123,40 @@ class Offlinecardpayment extends PaymentModule
 	}
 
 	function hookInvoice($params)
-	{
-		$id_order = $params['id_order'];
+	{   
+           
+            $id_order = $params['id_order'];
 		
 			global $smarty;
 			$paymentCarddetails = $this->readPaymentcarddetails($id_order);
-			
+			$refundOrderDetails = $this->readOrderdetails($id_order);
+                        
 			$smarty->assign(array(
-			    'cardHoldername'  	        => $paymentCarddetails['cardholdername'],
-				'cardNumber' 		=> $paymentCarddetails['cardnumber'],
-				'id_order'		=> $id_order,
-				'this_page'		=> $_SERVER['REQUEST_URI'],
-				'this_path' 		=> $this->_path,
-                                'this_path_ssl' 	=> Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
+                            'id_sbmorder'       => $refundOrderDetails['id_sbmorder'],
+                            'orderAmount'       => $refundOrderDetails['amount'],
+			    'cardHoldername'    => $paymentCarddetails['card_holder'],
+                            'cardNumber' 	=> $paymentCarddetails['card_number'],
+                            'id_order'		=> $id_order,
+                            'this_page'		=> $_SERVER['REQUEST_URI'],
+                            'this_path' 		=> $this->_path,
+                            'this_path_ssl' 	=> Configuration::get('PS_FO_PROTOCOL').$_SERVER['HTTP_HOST'].__PS_BASE_URI__."modules/{$this->name}/"));
 			return $this->display(__FILE__, 'invoice_block.tpl');
 
 	}
 	
         
-        function refundPayment($context){
+        function refundPayment($idSbmOrder,$amount){
            $pay = new PayPlugin(dirname(__FILE__).'/gateway/config.properties');
-            $response_reg = $pay->refund( array(
-                         "orderNumber" => $ordernumber+mt_rand(),
-                         "amount" => $context->cart->getOrderTotal(true, Cart::BOTH)                        
+           $resRefun = $pay->refund( array(
+                         "orderId" => $idSbmOrder,
+                         "amount" => $amount                       
                      ));
+           $resStatus = $pay->StatusRequest(
+                            array(
+                                      "orderId" => $idSbmOrder
+           ));
+           p($resRefun);
+           d($resStatus);
         }
 		
 	
@@ -293,11 +303,19 @@ class Offlinecardpayment extends PaymentModule
 	{
 		$db = Db::getInstance();
 		$result = $db->ExecuteS('
-		SELECT * FROM `ps_order_paymentcard`
-		WHERE `id_order` ="'.intval($id_order).'";');
+                    select B.card_number, B.card_brand, B.card_expiration, B.card_holder from 
+                     '._DB_PREFIX_.'orders A, '._DB_PREFIX_.'order_payment B WHERE A.reference = B.order_reference 
+                         AND A.id_order = '.$id_order.';');
 		return $result[0];
 	}
 	
+        function readOrderdetails($id_order)
+        {
+            $db = Db::getInstance();
+		$result = $db->ExecuteS('select B.amount, C.id_sbmorder from ps_orders A, ps_order_payment  B, ps_sbm_cartorder C 
+                    WHERE A.reference = B.order_reference AND A.id_cart=C.id_cart AND A.id_order = '.$id_order.';');
+		return $result[0];
+        }
 }	
 
 ?>

@@ -28,9 +28,9 @@
             }
             
             $.loader({
-						className:"blue-with-image",
-						content:''
-					});
+                    className:"blue-with-image",
+                    content:''
+                });
             $.post(
                  "{$this_path_ssl}validation.php",
                   { 
@@ -55,13 +55,14 @@
         });
     });
 </script>   
-<div class="error" style="display:{$errCss}">   
-    {$msgError}
-</div>
+
 <form action="#" method="post" id="cardDetFrm">
  <fieldset class="account_creation">   
      <h3>{l s='Détails de la carte de paiement' mod='offlinecardpayment'}</h3>
 <input type="hidden" name="sbmOrderId" id="sbmOrderId" value="{$sbmOrderId}" />
+<div class="error" style="display:{$errCss}">   
+    {$msgError}
+</div>
 <p class="required text">
     <label style="width:20%">{l s='Nom:' mod='offlinecardpayment'} <sup>*</sup></label>
      <input type="text" name="cardholderName" id="cardholderName" value="{$cardholderName}" class="text" />    
