@@ -95,7 +95,8 @@ class Offlinecardpayment extends PaymentModule
                             ('.$ordernumber.',"'.$sbmorderId.'")');
                     }
                    $errCss = empty($this->sbmOrderMsgSta)?"none":"block";
-		$smarty->assign(array(                        
+		$smarty->assign(array(  
+                        //'jqueryCreditCard' => Controller::addJqueryPlugin('validate-creditcard'),
                         'errCss'     => $errCss,
                         'msgError'   => $this->sbmOrderMsgSta,
 			'sbmOrderId' =>  $sbmorderId,
@@ -145,18 +146,53 @@ class Offlinecardpayment extends PaymentModule
 	}
 	
         
-        function refundPayment($idSbmOrder,$amount){
+        function refundPayment($context,$idSbmOrder,$amount){
+          $msgErrRefv = ''; //for message error refund/reverse
+          try{     
            $pay = new PayPlugin(dirname(__FILE__).'/gateway/config.properties');
-           $resRefun = $pay->refund( array(
-                         "orderId" => $idSbmOrder,
-                         "amount" => $amount                       
-                     ));
-           $resStatus = $pay->StatusRequest(
+              if(!empty($amount)){
+                $resRefun = $pay->refund( array(
+                              "orderId" => $idSbmOrder,
+                              "amount" => $amount                       
+                          ));
+               }else{
+                   $resRefun = $pay->reversal( array(
+                              "orderId" => $idSbmOrder
+                          ));
+               }
+           
+          }catch(Exception $e){
+              $msgErrRefv = $e->getMessage();            
+          }
+          try{
+              $resStatus = $pay->StatusRequest(
                             array(
                                       "orderId" => $idSbmOrder
-           ));
-           p($resRefun);
-           d($resStatus);
+              ));
+          }catch(Exception $e){
+               return json_encode(
+                                array("error"=>$e->getMessage())
+                     );
+          }
+          
+          if(!empty($msgErrRefv)){
+                  return json_encode(
+                           array(
+                               "error"=>($resStatus["OrderStatus"]==4)?"Cette transaction a été déja remboursée":"Une erreur est survenue. Veuillez contacter le support."
+                               )
+                  );
+              
+          }else{
+              $db = Db::getInstance(); 
+              $db->Execute('UPDATE `'._DB_PREFIX_.'sbm_cartorder` SET sbm_orderstatus = '.$resStatus["OrderStatus"].' WHERE id_sbmorder="'.$idSbmOrder.'"');
+              return json_encode(
+                           array(
+                               "error"=>"none",
+                               "success" => !empty($amount)?"Cette transaction a été remboursé":"Cette transaction a été annulée"
+                               )
+                  );
+          }
+          
         }
 		
 	
@@ -238,7 +274,7 @@ class Offlinecardpayment extends PaymentModule
                         parse_str($parseDat["query"]);
                     }  
                 }catch(Exception $e){
-                    $this->sbmOrderMsgSta = $e->getMessage();
+                    $this->sbmOrderMsgSta = "Une erreur est survenue. Veuillez ré-essayer.";
                     return;                    
                 }   
                 $db = Db::getInstance(); 

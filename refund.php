@@ -10,8 +10,8 @@ if (!$cookie->isLogged())
 $offlinecardpayment = new offlinecardpayment();
 $idSbmOrder = $_POST["id_sbmorder"];
 $amount     = $_POST["orderAmount"];
-echo $offlinecardpayment->refundPayment($idSbmOrder,$amount);
+echo $offlinecardpayment->refundPayment($context,$idSbmOrder,$amount);
 
-include_once(dirname(__FILE__).'/../../footer.php');
+
 
 ?>

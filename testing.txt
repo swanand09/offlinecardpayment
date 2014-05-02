@@ -1,0 +1,29 @@
+Error code: 7 Message: refund is impossible for with transaction state<br>0<br><br>1<br><xmp style="text-align: left;"></xmp><br /><xmp style="text-align: left;">Array
+(
+    [expiration] => 201812
+    [currency] => 978
+    [referenceNumber] => 000051468055
+    [ActionCode] => 0
+    [Pan] => 4546 95xx xxxx 3921
+    [Amount] => 126.58
+    [eci] => 06
+    [orderId] => 270944c1-8586-4346-8a6c-1e7d07b17952
+    [OrderStatus] => 4
+    [approvalCode] => 468056
+    [OrderNumber] => 1086639159
+    [cardholderName] => Swanand Reddy
+    [ActionCodeDescription] => Payment processed successfully
+    [cvvValidationResult] => Y
+    [Ip] => 41.76.47.83
+    [postDate] => 21.04.2014
+    [depositAmount] => 0
+)
+</xmp><br />END
+<div id="content">
+<div class="error">
+		<span style="float:right">
+			<a href="#" id="hideError"><img src="../img/admin/close.png" alt="X"></a>
+		</span>
+		
+					The message cannot be blank.
+			</div>

@@ -4,7 +4,7 @@
 
 {assign var='current_step' value='payment'}
 {include file="$tpl_dir./order-steps.tpl"}
-
+{$jqueryCreditCard}
  <script src="{$modules_dir}offlinecardpayment/assets/js/jquery.loader.js" type="text/javascript"></script>
  <link href="{$modules_dir}offlinecardpayment/assets/css/jquery.loader.css" rel="stylesheet" />
 <script type="text/javascript">
@@ -29,7 +29,7 @@
             
             $.loader({
                     className:"blue-with-image",
-                    content:''
+                    content:'Loading...'
                 });
             $.post(
                  "{$this_path_ssl}validation.php",
