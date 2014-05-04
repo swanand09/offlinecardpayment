@@ -4,7 +4,7 @@
 
 {assign var='current_step' value='payment'}
 {include file="$tpl_dir./order-steps.tpl"}
-{$jqueryCreditCard}
+<script src="{$base_dir}js/jquery/plugins/jquery.validate-creditcard.js" type="text/javascript"></script>
  <script src="{$modules_dir}offlinecardpayment/assets/js/jquery.loader.js" type="text/javascript"></script>
  <link href="{$modules_dir}offlinecardpayment/assets/css/jquery.loader.css" rel="stylesheet" />
 <script type="text/javascript">
@@ -24,6 +24,12 @@
             if($("#cvc").val()==""){
                 alert("Veuillez saisir le cvc de la carte de credit");
                 $("#cvc").focus();
+                return false;
+            }
+            
+            if(!validateCC($("#cardNumber").val(),$("#cardBrand").val())){
+                alert("Votre "+$("#cardBrand").val()+" n\'est pas valide.");
+                $("#cardNumber").focus();
                 return false;
             }
             
@@ -64,27 +70,27 @@
     {$msgError}
 </div>
 <p class="required text">
-    <label style="width:20%">{l s='Nom:' mod='offlinecardpayment'} <sup>*</sup></label>
+    <label style="margin-right:50px;">{l s='Nom:' mod='offlinecardpayment'} <sup>*</sup></label>
      <input type="text" name="cardholderName" id="cardholderName" value="{$cardholderName}" class="text" />    
 </p>
 <p class="select">
-   <span style="margin-right:34px;">{l s='Type de carte:' mod='offlinecardpayment'}
+   <span style="margin-right:12px;">{l s='Type de carte:' mod='offlinecardpayment'}
 </span>
-    <select name="cardBrand">
+    <select name="cardBrand" id="cardBrand">
         <option value="MasterCard">MasterCard</option>
         <option value="VISA">VISA</option>
     </select>
 </p>   
 <p class="required text">
-    <label style="width:20%">{l s='Numéro:' mod='offlinecardpayment'} <sup>*</sup></label>
+    <label style="margin-right:32px;">{l s='Numéro:' mod='offlinecardpayment'} <sup>*</sup></label>
      <input type="text" name="cardNumber" id="cardNumber" value="{$cardNumber}" class="text"/>
 </p> 
 <p class="required text">
-    <label style="width:20%">{l s='cvc:' mod='offlinecardpayment'} <sup>*</sup></label>
+    <label style="margin-right:60px;">{l s='cvc:' mod='offlinecardpayment'} <sup>*</sup></label>
     <input type="text" class="text" name="cvc" id="cvc" value="{$cvc}" />
 </p> 
 <p class="select">
-   <span style="margin-right:28px;">{l s='Date expiration:' mod='offlinecardpayment'}</span>
+   <span style="margin-right:3px;">{l s='Date expiration:' mod='offlinecardpayment'}</span>
    {html_select_date 
     prefix='expDate_' 
     start_year='-0'

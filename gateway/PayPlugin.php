@@ -99,8 +99,7 @@ class PayPlugin
 		$this->Logging("Sending request: ".$this->ArrayToPost($request_full));
 		try {
 			$response = $request->send();
-                       
-			if (200 != $response->getStatus()) {
+                        if (200 != $response->getStatus()) {
 				throw new BadHttpResponseCodeException("Unexpected HTTP status: " . $response->getStatus() . " " . $response->getReasonPhrase());
 			}			
 		}	catch (HTTP_Request2_Exception $e) {

@@ -274,10 +274,25 @@ class Offlinecardpayment extends PaymentModule
                         parse_str($parseDat["query"]);
                     }  
                 }catch(Exception $e){
+                   
+                    $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId));
+                     /*
+                    switch($status["errorCode"]){
+                        case 2: 
+                            break;
+                        case 5: 
+                            break;
+                        case 6: 
+                            $this->sbmOrderMsgSta = "Une erreur est survenue. Le numéro de commande n\est";
+                            break;
+                        default:$this->sbmOrderMsgSta = "Une erreur est survenue. Veuillez ré-essayer.";
+                    }*/
                     $this->sbmOrderMsgSta = "Une erreur est survenue. Veuillez ré-essayer.";
                     return;                    
                 }   
                 $db = Db::getInstance(); 
+                $approvalCode    = empty($approvalCode)?0:$approvalCode;
+                $referenceNumber = empty($referenceNumber)?0:$referenceNumber;
                 $db->Execute('UPDATE `'._DB_PREFIX_.'sbm_cartorder` SET sbm_orderstatus = '.$OrderStatus.', sbm_approvalcode='.$approvalCode.', sbm_referenceNum='.$referenceNumber.', sbm_orderNum ='.$OrderNumber.' WHERE id_sbmorder="'.$sbmOrderId.'"');
                 
                 $this->transactionId = $referenceNumber;
@@ -296,14 +311,13 @@ class Offlinecardpayment extends PaymentModule
                        $message = "Authorization cancelled";
                    break;
                    case 4:
-                       $message = "Transaction operation was refunded";
+                       $message = "La transaction a été remboursée."; // $message = "Transaction operation was refunded";
                    break;
                    case 5:
                        $message = "Authorization was initiated through the ACS of issuing bank";
                    break;
                    case 6:
-                      // $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId)); 
-                       $message = "Authorization rejected";
+                       $message = "Votre carte de credit a été refusée."; //$message = "Authorization rejected";
                    break;
                }
                   $this->sbmOrderMsgSta = $message;
