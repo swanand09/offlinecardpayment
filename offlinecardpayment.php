@@ -336,14 +336,17 @@ class Offlinecardpayment extends PaymentModule
 		{
 			$this->smarty->assign(array(
 				'total_to_pay' => Tools::displayPrice($params['total_to_pay'], $params['currencyObj'], false),				
-				'status' => 'ok',
+				'status' => 'OK',
 				'id_order' => $params['objOrder']->id
 			));
 			if (isset($params['objOrder']->reference) && !empty($params['objOrder']->reference))
 				$this->smarty->assign('reference', $params['objOrder']->reference);
 		}
-		else
-			$this->smarty->assign('status', 'failed');
+                else if($psOrderStatus == Configuration::get('PS_OS_OUTOFSTOCK')){
+                    $this->smarty->assign('status', 'OUTOFSTOCK');
+                }else{
+			$this->smarty->assign('status', 'ERROR');
+                }        
 		return $this->display(__FILE__, 'payment_return.tpl');
 	}
     /*
