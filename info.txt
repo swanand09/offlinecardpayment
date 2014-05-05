@@ -5,3 +5,15 @@ Expiry: 12/18  CVV2: 670
 Card:4546951000493921
 Expiry: 12/18  CVV2: 132
 -----------------------------------------------
+
+Please try perform tests with the below cards as the same has been configured.
+pan=4111111111111111&cvc=123&expiry=201512
+
+--------------MasterCard------------------
+Card:5471241000047208
+Expiry: 12/18  CVV2: 670
+---------------VISA--------------------------
+Card:4546951000493921
+Expiry: 12/18  CVV2: 132
+-----------------------------------------------
+ 

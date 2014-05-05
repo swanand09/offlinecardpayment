@@ -178,7 +178,7 @@ class Offlinecardpayment extends PaymentModule
           if(!empty($msgErrRefv)){
                   return json_encode(
                            array(
-                               "error"=>($resStatus["OrderStatus"]==4)?"Cette transaction a été déja remboursée":"Une erreur est survenue. Veuillez contacter le support."
+                               "error"=>($resStatus["OrderStatus"]==4)?"Cette transaction a été déja remboursée/annulée ou le delaie pour l'annulation a été expiré.":"Une erreur est survenue. Veuillez contacter le support."
                                )
                   );
               

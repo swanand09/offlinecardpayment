@@ -5,7 +5,7 @@
        $('#refundBut').click(function(){
             $.loader({
                     className:"black-with-image",
-                    content:'<span style="padding-left:20px">Loading...</span>'
+                    content:'<span style="padding-left:20px">Chargement en cours...</span>'
                 });
                 var orderAmt;
                 orderAmt = $("#refundAmt").val();
@@ -32,7 +32,7 @@
          $('#reverseBut').click(function(){
             $.loader({
                     className:"black-with-image",
-                      content:'Loading...'
+                      content:'Chargement en cours...'
                 });
             $.post(
                  "{$this_path}refund.php",
@@ -64,7 +64,7 @@
 <fieldset style="margin-top:50px;">
 	<legend>
                 <img src="../img/admin/tab-customers.gif"> 
-                {l s='Payment Card Information' mod='offlinecardpayment'}
+                {l s='Carte de paiement' mod='offlinecardpayment'}
 	</legend>
 	<label class="sbmLabel">Card Holder Name:</label><div class="margin-form sbm">Swanand Reddy</div>
 	<label class="sbmLabel">Card Number:</label><div class="margin-form sbm"> 5471241000047208</div>
