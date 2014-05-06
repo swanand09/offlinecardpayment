@@ -34,7 +34,7 @@ switch($offlinecardpayment->sbmOrderStatus){
         $offlinecardpayment->validateOrder($cart->id,  _PS_OS_PREPARATION_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
     break;
     case 2:
-        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_PAYMENT_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
+        $offlinecardpayment->validateOrder($cart->id,  _PS_OS_PAYMENT_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);        
     break;
     case 3:
         $offlinecardpayment->validateOrder($cart->id,  _PS_OS_CANCELED_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
@@ -46,7 +46,7 @@ switch($offlinecardpayment->sbmOrderStatus){
         $offlinecardpayment->validateOrder($cart->id,  _PS_OS_ERROR_, $total, $offlinecardpayment->displayName, NULL, $transactionArr, $currency->id);
     break;
 }
-
+$offlinecardpayment->updateOrderPayment($transactionArr);
 $order = new Order($offlinecardpayment->currentOrder);
 
 //Tools::redirectLink(__PS_BASE_URI__.'order-confirmation.php?id_cart='.$cart->id.'&id_module='.$offlinecardpayment->id.'&id_order='.$offlinecardpayment->currentOrder.'&key='.$order->secure_key);

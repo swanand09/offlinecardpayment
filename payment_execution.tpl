@@ -105,7 +105,7 @@
 <p class="select">
    <span style="margin-right:12px;">{l s='Type de carte:' mod='offlinecardpayment'}
 </span>
-    <select name="cardBrand" id="cardBrand" class="validate[required,funcCall[validateCreditCard]]">
+    <select name="cardBrand" id="cardBrand">
         <option value="MasterCard">MasterCard</option>
         <option value="VISA">VISA</option>
     </select>

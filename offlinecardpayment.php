@@ -134,9 +134,11 @@ class Offlinecardpayment extends PaymentModule
                         
 			$smarty->assign(array(
                             'id_sbmorder'       => $refundOrderDetails['id_sbmorder'],
+                            'sbm_orderstatus'   => $refundOrderDetails['sbm_orderstatus'],
                             'orderAmount'       => $refundOrderDetails['amount'],
 			    'cardHoldername'    => $paymentCarddetails['card_holder'],
                             'cardNumber' 	=> $paymentCarddetails['card_number'],
+                            'cardBrand'         => $paymentCarddetails["card_brand"],
                             'id_order'		=> $id_order,
                             'this_page'		=> $_SERVER['REQUEST_URI'],
                             'this_path' 		=> $this->_path,
@@ -185,16 +187,34 @@ class Offlinecardpayment extends PaymentModule
           }else{
               $db = Db::getInstance(); 
               $db->Execute('UPDATE `'._DB_PREFIX_.'sbm_cartorder` SET sbm_orderstatus = '.$resStatus["OrderStatus"].' WHERE id_sbmorder="'.$idSbmOrder.'"');
-              return json_encode(
-                           array(
-                               "error"=>"none",
-                               "success" => !empty($amount)?"Cette transaction a été remboursé":"Cette transaction a été annulée"
-                               )
-                  );
+              switch($resStatus["OrderStatus"]){
+                  case 3:
+                               return json_encode(
+                                  array(
+                                    "error"=>!empty($amount)?"La transaction ne peut être remboursée.":"La transaction ne peut être annulée"
+                                    )
+                               );
+                      break;
+                  case 4:
+                               return json_encode(
+                                   array(
+                                       "error"=>"none",
+                                       "success" => !empty($amount)?"Cette transaction a été remboursé":"Cette transaction a été annulée"
+                                       )
+                                );
+                      break;
+              }
+              
           }
           
         }
-		
+	
+        
+        function updateOrderPayment($transactionArr){
+            $db = Db::getInstance(); 
+            $db->Execute('UPDATE `'._DB_PREFIX_.'order_payment` SET card_number = '.$transactionArr["card_number"].', card_brand = "'.$transactionArr["card_brand"].'", card_expiration="'.$transactionArr["card_expiration"].'",card_holder="'.$transactionArr["card_holder"].'" WHERE transaction_id='.$transactionArr["transaction_id"]);
+            return;
+        }
 	
 	function createPaymentcardtbl()
 	{
@@ -365,7 +385,7 @@ class Offlinecardpayment extends PaymentModule
         function readOrderdetails($id_order)
         {
             $db = Db::getInstance();
-		$result = $db->ExecuteS('select B.amount, C.id_sbmorder from ps_orders A, ps_order_payment  B, ps_sbm_cartorder C 
+		$result = $db->ExecuteS('select B.amount, C.id_sbmorder, C.sbm_orderstatus from ps_orders A, ps_order_payment  B, ps_sbm_cartorder C 
                     WHERE A.reference = B.order_reference AND A.id_cart=C.id_cart AND A.id_order = '.$id_order.';');
 		return $result[0];
         }
