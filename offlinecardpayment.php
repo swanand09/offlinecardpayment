@@ -17,8 +17,8 @@ class Offlinecardpayment extends PaymentModule
 		parent::__construct(); // The parent construct is required for translations
                 
 		$this->page = basename(__FILE__, '.php');
-		$this->displayName = $this->l('Offline Payments Module');
-		$this->description = $this->l('Take Payment Card details for offline processing');
+		$this->displayName = $this->l('SBM Module De Paiement');
+		$this->description = $this->l('Procède le paiement à travers la SBM');
  
 	}
 
@@ -41,7 +41,8 @@ class Offlinecardpayment extends PaymentModule
 
 	public function uninstall()
 	{
-		if (!parent::uninstall()OR !$this->deletePaymentcardtbl())
+		//if (!parent::uninstall()OR !$this->deletePaymentcardtbl())
+    if (!parent::uninstall())
 			return false;
 		return true;
 	}
@@ -281,12 +282,12 @@ class Offlinecardpayment extends PaymentModule
                     $response_pay = $pay->AuthorizePaymentRequest($payment_arr);
 
                     if(isset($response_pay["error"])){
-                        throw new Exception("Error connecting to SBM gateway ".$response_pay["error"]);
-                        $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId)); 
+                        throw new Exception($response_pay["error"]);
+                       /*$status       = $pay->StatusRequest(array("orderId" => $sbmOrderId)); 
                         $OrderStatus        = $status["OrderStatus"];  
                         $OrderNumber        = $status["OrderNumber"];  
                         $approvalCode       = $status["approvalCode"];
-                        $referenceNumber    = $status["referenceNumber"]; 
+                        $referenceNumber    = $status["referenceNumber"]; */
                         
                     }else{
                         $parseDat = array();
@@ -295,20 +296,8 @@ class Offlinecardpayment extends PaymentModule
                     }  
                 }catch(Exception $e){
                    
-                    $status       = $pay->StatusRequest(array("orderId" => $sbmOrderId));
-                     /*
-                    switch($status["errorCode"]){
-                        case 2: 
-                            break;
-                        case 5: 
-                            break;
-                        case 6: 
-                            $this->sbmOrderMsgSta = "Une erreur est survenue. Le numéro de commande n\est";
-                            break;
-                        default:$this->sbmOrderMsgSta = "Une erreur est survenue. Veuillez ré-essayer.";
-                    }*/
-                    $this->sbmOrderMsgSta = "Une erreur est survenue. Veuillez ré-essayer.";
-                    return;                    
+                  $this->sbmOrderMsgSta = ($e->getMessage()=="Cardholder name must have first name and last name<br>")?"Veuillez saisir votre nom et prenom.": "Une erreur est survenue. Veuillez ré-essayer.";
+                  return;                    
                 }   
                 $db = Db::getInstance(); 
                 $approvalCode    = empty($approvalCode)?0:$approvalCode;

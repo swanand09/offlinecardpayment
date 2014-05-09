@@ -1,10 +1,10 @@
 <p class="payment_module">
 
-	<a href="{$this_path}payment.php" title="{l s='Pay with your Credit or Debit Card' mod='offlinecardpayment'}">
+	<a href="{$this_path}payment.php" title="{l s='Paiement - Carte de credit' mod='offlinecardpayment'}">
 
-		<img src="{$this_path}cards.png" alt="{l s='Pay with your Credit or Debit Card' mod='offlinecardpayment'}" />
+		<img src="{$this_path}sbm.jpg" alt="{l s='Paiement - Carte de credit' mod='offlinecardpayment'}" />
 
-		{l s='Pay with a credit card' mod='offlinecardpayment'}
+		{l s='Paiement - Carte de credit' mod='offlinecardpayment'}
 
 	</a>
 

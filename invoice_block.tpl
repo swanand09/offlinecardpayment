@@ -78,7 +78,7 @@
 	<label class="sbmLabel">Numéro:</label>{if $cardNumber !=''}<div class="margin-form sbm">{$cardNumber}</div>{/if}
         <label class="sbmLabel">Type:</label>{if $cardBrand !=''}<div class="margin-form sbm">{$cardBrand}</div>{/if}
        {if $sbm_orderstatus==2 || $sbm_orderstatus==3}
-        <label id="amtLbl" class="sbmLabel">Amount:</label> <div id="inptAmtex" class="margin-form sbm"><input type="text" name="refundAmt" id="refundAmt" value /></div>
+        <label id="amtLbl" class="sbmLabel">Montant:</label> <div id="inptAmtex" class="margin-form sbm"><input type="text" name="refundAmt" id="refundAmt" value /></div>
         <p class="center"> 
              <input type="button" value="{l s='Rembourser transaction' mod='offlinecardpayment'}" class="button" name="refundBut" id="refundBut" />&nbsp; 
               <input type="button" value="{l s='Annuler transaction' mod='offlinecardpayment'}" class="button" name="reverseBut" id="reverseBut" />
